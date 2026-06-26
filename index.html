@@ -1,11 +1,124 @@
-<!DOCTYPE HTML>
-<HTML>
-  <HEAD>
-    <title>Lobby Schedule</title>
-  </HEAD>
-  <body
-    style="background:#111;color:white;font-family:Arial;text-align:center;margin-top:100px;">
-    <h1>My Display is working</h1>
-    <p> Github page is running fine.</p>
-  </body>
-</HTML>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby Display</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- LEFT SIDE -->
+    <div class="left-panel">
+
+        <div class="header">
+
+            <div class="logo">
+                <img src="assets/logo.png" alt="Logo" id="logo">
+            </div>
+
+            <div class="title">
+                SHIFT SCHEDULE
+            </div>
+
+        </div>
+
+        <div class="schedule">
+
+            <iframe
+                src="pdf/schedule.pdf"
+                id="scheduleFrame"
+                frameborder="0">
+            </iframe>
+
+        </div>
+
+    </div>
+
+    <!-- RIGHT SIDE -->
+    <div class="right-panel">
+
+        <div class="clock-card">
+
+            <div class="clock-title">
+                CURRENT TIME
+            </div>
+
+            <div id="clock">
+                00:00:00
+            </div>
+
+        </div>
+
+        <div class="date-card">
+
+            <div class="clock-title">
+                TODAY
+            </div>
+
+            <div id="date">
+                Loading...
+            </div>
+
+        </div>
+
+        <div class="weather-card">
+
+            <div class="clock-title">
+                WEATHER
+            </div>
+
+            <div id="weatherIcon">
+                ☀️
+            </div>
+
+            <div id="temperature">
+                --
+            </div>
+
+            <div id="weatherText">
+                Loading...
+            </div>
+
+        </div>
+
+        <div class="notice-card">
+
+            <div class="clock-title">
+                NOTICE
+            </div>
+
+            <div id="notice">
+
+                Safety First<br><br>
+
+                Wear PPE<br><br>
+
+                Have a great shift!
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="ticker">
+
+    <div class="ticker-text">
+
+        📢 Welcome • Stay Safe • Check Today's Shift Carefully • Report Safety Hazards Immediately • Have A Great Day!
+
+    </div>
+
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
