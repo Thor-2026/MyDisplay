@@ -1,1 +1,16 @@
+backend:
+  name: github
+  repo: thor-2026/thor-2026.github.io
+  branch: main
 
+media_folder: "schedule"
+public_folder: "/schedule"
+
+collections:
+  - name: "schedule_image"
+    label: "Schedule Image"
+    files:
+      - file: "schedule/schedule.png"
+        label: "Daily Schedule Image"
+        name: "schedule_image"
+        widget: image
