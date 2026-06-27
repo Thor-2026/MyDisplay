@@ -1,24 +1,8 @@
 const SUPABASE_URL = "https://ggohaurqbsyamznzuuaf.supabase.co";
 
-const SUPABASE_KEY = "sb_publishable_ZpHvrV-a_BmznhfbVupvxQ_b5NKYPYk";
+const SUPABASE_KEY = "PASTE_YOUR_PUBLISHABLE_KEY_HERE";
 
 const supabaseClient = supabase.createClient(
     SUPABASE_URL,
     SUPABASE_KEY
 );
-
-async function loadSettings() {
-
-    const { data, error } = await supabaseClient
-        .from("settings")
-        .select("*")
-        .eq("id", 1)
-        .single();
-
-    if (error) {
-        console.error(error);
-        return null;
-    }
-
-    return data;
-}
