@@ -196,3 +196,10 @@ img.src="schedule/schedule.png?v="+new Date().getTime();
 }
 
 },60000);
+(async () => {
+
+    const settings = await loadSettings();
+
+    console.log(settings);
+
+})();
