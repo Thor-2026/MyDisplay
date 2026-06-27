@@ -200,6 +200,10 @@ img.src="schedule/schedule.png?v="+new Date().getTime();
 
     const settings = await loadSettings();
 
-    console.log(settings);
+    if (settings) {
+        alert("✅ Connected to Supabase successfully!");
+    } else {
+        alert("❌ Could not connect to Supabase.");
+    }
 
 })();
