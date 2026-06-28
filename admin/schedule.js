@@ -32,7 +32,7 @@ uploadBtn.addEventListener("click", async () => {
 
     status.innerHTML = "Uploading...";
 
-    const { error } = await supabase.storage
+    const { error } = await supabaseClient.storage
         .from("display")
         .upload("schedule/current.png", selectedFile, {
             upsert: true
