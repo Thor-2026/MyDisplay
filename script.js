@@ -185,17 +185,7 @@ ticker.innerHTML=
       IMAGE AUTO RELOAD
 =========================== */
 
-setInterval(function(){
 
-const img=document.getElementById("scheduleImage");
-
-if(img){
-
-img.src="schedule/schedule.png?v="+new Date().getTime();
-
-}
-
-},60000);
 (async () => {
 
     const settings = await loadSettings();
