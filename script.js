@@ -134,43 +134,52 @@ location.reload();
       ANNOUNCEMENTS
 =========================== */
 
-const announcements=[
+let announcements = [];
+let notice = 0;
 
-"👷 Wear PPE at all times",
+async function loadAnnouncements() {
 
-"📋 Check today's shift schedule",
+    const { data, error } = await supabaseClient
+        .from("announcements")
+        .select("*")
+        .eq("enabled", true)
+        .order("sort_order", { ascending: true });
 
-"🚨 Report hazards immediately",
+    if (error) {
+        console.error(error);
+        return;
+    }
 
-"☕ Enjoy your shift",
+    announcements = data;
 
-"✅ Safety starts with you"
-
-];
-
-let notice=0;
-
-function rotateAnnouncements(){
-
-const list=document.getElementById("announcements");
-
-if(!list) return;
-
-list.innerHTML="<li>"+announcements[notice]+"</li>";
-
-notice++;
-
-if(notice>=announcements.length){
-
-notice=0;
+    rotateAnnouncements();
 
 }
 
+function rotateAnnouncements() {
+
+    const list = document.getElementById("announcements");
+
+    if (!list || announcements.length === 0) return;
+
+    list.innerHTML = "<li>" + announcements[notice].message + "</li>";
+
+    notice++;
+
+    if (notice >= announcements.length) {
+
+        notice = 0;
+
+    }
+
 }
 
-rotateAnnouncements();
+loadAnnouncements();
 
-setInterval(rotateAnnouncements,8000);
+setInterval(rotateAnnouncements, 8000);
+
+// Reload announcements every minute
+setInterval(loadAnnouncements, 60000);
 
 /* ===========================
        TICKER TEXT
