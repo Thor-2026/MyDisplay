@@ -1,12 +1,31 @@
-document.getElementById("logoutBtn").addEventListener("click", async () => {
+async function loadPage(page){
 
-    const { error } = await supabaseClient.auth.signOut();
+    const response = await fetch(
+        "views/" + page + ".html"
+    );
 
-    if (error) {
-        console.error(error);
-        return;
-    }
+    const html = await response.text();
 
-    window.location.href = "index.html";
+    document.getElementById("pageContent").innerHTML = html;
+
+}
+
+loadPage("dashboard");
+
+document.querySelectorAll(".menu").forEach(button=>{
+
+button.onclick=()=>{
+
+document.querySelectorAll(".menu").forEach(m=>{
+
+m.classList.remove("active");
+
+});
+
+button.classList.add("active");
+
+loadPage(button.dataset.page);
+
+};
 
 });
