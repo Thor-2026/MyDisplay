@@ -3,299 +3,130 @@
 // Announcements Manager
 // =======================================
 
-let selectedAnnouncementId = null;
-
-// ----------------------------
-// Initialize Page
-// ----------------------------
-
 async function initAnnouncementsPage() {
 
-    document
-        .getElementById("newAnnouncement")
-        .onclick = showNewAnnouncement;
-
-    document
-        .getElementById("saveAnnouncement")
-        .onclick = saveAnnouncement;
-
-    document
-        .getElementById("deleteAnnouncement")
-        .onclick = deleteAnnouncement;
-
-    document
-        .getElementById("cancelEdit")
-        .onclick = closeEditor;
-
-    closeEditor();
-
-    await loadAnnouncements();
-
-}
-
-// ----------------------------
-// Load announcements
-// ----------------------------
-
-async function loadAnnouncements() {
-
     const list = document.getElementById("announcementList");
+    const input = document.getElementById("newAnnouncement");
+    const addBtn = document.getElementById("addAnnouncement");
 
-    list.innerHTML = "Loading...";
+    if (!list) return;
 
-    const { data, error } = await supabaseClient
+    async function loadAnnouncements() {
 
-        .from("announcements")
-
-        .select("*")
-
-        .order("sort_order", { ascending: true });
-
-    if (error) {
-
-        list.innerHTML = error.message;
-
-        return;
-
-    }
-
-    list.innerHTML = "";
-
-    data.forEach(item => {
-
-        const card = document.createElement("div");
-
-        card.className = "announcement-item";
-
-        card.innerHTML = `
-
-<h3>${item.title || "Untitled"}</h3>
-
-<p>${item.message}</p>
-
-<small>
-
-${item.enabled ? "🟢 Enabled" : "⚪ Disabled"}
-
-</small>
-
-`;
-
-        card.onclick = () => {
-
-            document.querySelectorAll(".announcement-item")
-                .forEach(i => i.classList.remove("active"));
-
-            card.classList.add("active");
-
-            editAnnouncement(item);
-
-        };
-
-        list.appendChild(card);
-
-    });
-
-}
-
-// ----------------------------
-// Open New Editor
-// ----------------------------
-
-function showNewAnnouncement() {
-
-    selectedAnnouncementId = null;
-
-    document.getElementById("announcementWelcome").style.display = "none";
-
-    document.getElementById("announcementEditor").style.display = "block";
-
-    document.getElementById("editorTitle").innerText =
-        "New Announcement";
-
-    document.getElementById("announcementTitle").value = "";
-
-    document.getElementById("announcementMessage").value = "";
-
-    document.getElementById("announcementEnabled").checked = true;
-
-    document.getElementById("announcementStatus").innerHTML = "";
-
-}
-
-// ----------------------------
-// Edit Existing
-// ----------------------------
-
-function editAnnouncement(item) {
-
-    selectedAnnouncementId = item.id;
-
-    document.getElementById("announcementWelcome").style.display = "none";
-
-    document.getElementById("announcementEditor").style.display = "block";
-
-    document.getElementById("editorTitle").innerText =
-        "Edit Announcement";
-
-    document.getElementById("announcementTitle").value =
-        item.title || "";
-
-    document.getElementById("announcementMessage").value =
-        item.message || "";
-
-    document.getElementById("announcementEnabled").checked =
-        item.enabled;
-
-}
-
-// ----------------------------
-// Close Editor
-// ----------------------------
-
-function closeEditor() {
-
-    selectedAnnouncementId = null;
-
-    document.getElementById("announcementWelcome").style.display = "block";
-
-    document.getElementById("announcementEditor").style.display = "none";
-
-    document.querySelectorAll(".announcement-item")
-        .forEach(i => i.classList.remove("active"));
-
-}
-
-// ----------------------------
-// Save
-// ----------------------------
-
-async function saveAnnouncement() {
-
-    const title =
-        document.getElementById("announcementTitle").value.trim();
-
-    const message =
-        document.getElementById("announcementMessage").value.trim();
-
-    const enabled =
-        document.getElementById("announcementEnabled").checked;
-
-    const status =
-        document.getElementById("announcementStatus");
-
-    if (message === "") {
-
-        status.innerHTML = "Please enter a message.";
-
-        return;
-
-    }
-
-    status.innerHTML = "Saving...";
-
-    let result;
-
-    if (selectedAnnouncementId) {
-
-        result = await supabaseClient
-
+        const { data, error } = await supabaseClient
             .from("announcements")
+            .select("*")
+            .order("sort_order");
 
-            .update({
+        if (error) {
 
-                title,
+            list.innerHTML = error.message;
 
-                message,
-
-                enabled
-
-            })
-
-            .eq("id", selectedAnnouncementId);
-
-    } else {
-
-        const { data } = await supabaseClient
-
-            .from("announcements")
-
-            .select("sort_order")
-
-            .order("sort_order", { ascending: false })
-
-            .limit(1);
-
-        let nextOrder = 1;
-
-        if (data.length) {
-
-            nextOrder = data[0].sort_order + 1;
+            return;
 
         }
 
-        result = await supabaseClient
+        list.innerHTML = "";
+
+        data.forEach(item => {
+
+            const row = document.createElement("div");
+
+            row.className = "announcementRow";
+
+            row.innerHTML = `
+                <input
+                    type="text"
+                    value="${item.message}"
+                    id="msg-${item.id}">
+
+                <button onclick="saveAnnouncement(${item.id})">
+                    💾 Save
+                </button>
+
+                <button onclick="deleteAnnouncement(${item.id})">
+                    🗑 Delete
+                </button>
+            `;
+
+            list.appendChild(row);
+
+        });
+
+    }
+
+    addBtn.onclick = async () => {
+
+        const text = input.value.trim();
+
+        if (text === "") return;
+
+        const { error } = await supabaseClient
 
             .from("announcements")
 
             .insert({
 
-                title,
+                message: text,
 
-                message,
+                enabled: true,
 
-                enabled,
-
-                sort_order: nextOrder
+                sort_order: Date.now()
 
             });
 
-    }
+        if (error) {
 
-    if (result.error) {
+            alert(error.message);
 
-        status.innerHTML = result.error.message;
+            return;
 
-        return;
+        }
 
-    }
+        input.value = "";
 
-    status.innerHTML = "✅ Saved";
+        loadAnnouncements();
 
-    await loadAnnouncements();
+    };
 
-    closeEditor();
+    window.saveAnnouncement = async function(id) {
 
-}
+        const value =
+            document.getElementById("msg-" + id).value;
 
-// ----------------------------
-// Delete
-// ----------------------------
+        await supabaseClient
 
-async function deleteAnnouncement() {
+            .from("announcements")
 
-    if (!selectedAnnouncementId) return;
+            .update({
 
-    if (!confirm("Delete this announcement?")) return;
+                message: value
 
-    const { error } = await supabaseClient
+            })
 
-        .from("announcements")
+            .eq("id", id);
 
-        .delete()
+        loadAnnouncements();
 
-        .eq("id", selectedAnnouncementId);
+    };
 
-    if (error) {
+    window.deleteAnnouncement = async function(id) {
 
-        alert(error.message);
+        if (!confirm("Delete this announcement?"))
+            return;
 
-        return;
+        await supabaseClient
 
-    }
+            .from("announcements")
 
-    await loadAnnouncements();
+            .delete()
 
-    closeEditor();
+            .eq("id", id);
+
+        loadAnnouncements();
+
+    };
+
+    loadAnnouncements();
 
 }
