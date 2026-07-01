@@ -1,3 +1,8 @@
+// =======================================
+// THOR DISPLAY CMS
+// Schedule Manager
+// =======================================
+
 function initSchedulePage() {
 
     const fileInput = document.getElementById("scheduleFile");
@@ -5,65 +10,90 @@ function initSchedulePage() {
     if (!fileInput) return;
 
     const preview = document.getElementById("preview");
-
     const uploadBtn = document.getElementById("uploadBtn");
-
     const status = document.getElementById("status");
+    const currentSchedule = document.getElementById("currentSchedule");
 
-    const currentSchedule =
-        document.getElementById("currentSchedule");
+    // Show current schedule
 
-    currentSchedule.src =
-        supabaseClient.storage
+    const imageUrl = supabaseClient.storage
         .from("display")
         .getPublicUrl("schedule/current.png")
-        .data.publicUrl +
-        "?t=" + Date.now();
+        .data.publicUrl;
+
+    currentSchedule.src =
+        imageUrl + "?t=" + Date.now();
 
     let selectedFile = null;
 
-    fileInput.onchange = () => {
+    // Preview image
+
+    fileInput.addEventListener("change", () => {
 
         selectedFile = fileInput.files[0];
+
+        if (!selectedFile) return;
 
         preview.src =
             URL.createObjectURL(selectedFile);
 
         preview.style.display = "block";
 
-    };
+    });
 
-    uploadBtn.onclick = async () => {
+    // Upload
 
-        if (!selectedFile) return;
+    uploadBtn.addEventListener("click", async () => {
 
-        status.innerHTML = "Uploading...";
+        if (!selectedFile) {
 
-        const { error } =
-        await supabaseClient.storage
-
-        .from("display")
-
-        .upload(
-            "schedule/current.png",
-            selectedFile,
-            { upsert:true }
-        );
-
-        if(error){
-
-            status.innerHTML=error.message;
+            alert("Please choose an image.");
 
             return;
 
         }
 
-        status.innerHTML="✅ Uploaded";
+        uploadBtn.disabled = true;
 
-        currentSchedule.src=
-        currentSchedule.src.split("?")[0]+
-        "?t="+Date.now();
+        status.innerHTML = "Uploading...";
 
-    };
+        const { error } = await supabaseClient.storage
+
+            .from("display")
+
+            .upload(
+                "schedule/current.png",
+                selectedFile,
+                {
+                    upsert: true
+                }
+            );
+
+        if (error) {
+
+            status.innerHTML =
+                "❌ " + error.message;
+
+            uploadBtn.disabled = false;
+
+            return;
+
+        }
+
+        status.innerHTML =
+            "✅ Schedule Published Successfully";
+
+        currentSchedule.src =
+            imageUrl + "?t=" + Date.now();
+
+        preview.style.display = "none";
+
+        fileInput.value = "";
+
+        selectedFile = null;
+
+        uploadBtn.disabled = false;
+
+    });
 
 }
