@@ -1,66 +1,67 @@
-// ==============================
+// ======================================
 // THOR DISPLAY CMS
 // Dashboard Controller
-// ==============================
+// ======================================
 
-// Load a module into the content area
+const modules = {
+    dashboard: {
+        file: "views/dashboard.html",
+        init: null
+    },
+    schedule: {
+        file: "views/schedule.html",
+        init: "initSchedulePage"
+    },
+    announcements: {
+        file: "views/announcements.html",
+        init: "initAnnouncementsPage"
+    },
+    branding: {
+        file: "views/branding.html",
+        init: "initBrandingPage"
+    },
+    weather: {
+        file: "views/weather.html",
+        init: "initWeatherPage"
+    },
+    settings: {
+        file: "views/settings.html",
+        init: "initSettingsPage"
+    }
+};
+
 async function loadPage(page) {
 
     try {
 
-        const response = await fetch("views/" + page + ".html");
+        const module = modules[page];
+
+        if (!module) {
+            throw new Error("Unknown page: " + page);
+        }
+
+        const response = await fetch(module.file);
 
         if (!response.ok) {
-            throw new Error("Unable to load " + page + ".html");
+            throw new Error("Cannot load " + module.file);
         }
 
         const html = await response.text();
 
         document.getElementById("pageContent").innerHTML = html;
 
-        // Initialize page-specific JavaScript
-        switch (page) {
-
-            case "schedule":
-                if (typeof initSchedulePage === "function") {
-                    initSchedulePage();
-                }
-                break;
-
-            case "announcements":
-                if (typeof initAnnouncementsPage === "function") {
-                    initAnnouncementsPage();
-                }
-                break;
-
-            case "branding":
-                if (typeof initBrandingPage === "function") {
-                    initBrandingPage();
-                }
-                break;
-
-            case "weather":
-                if (typeof initWeatherPage === "function") {
-                    initWeatherPage();
-                }
-                break;
-
-            case "settings":
-                if (typeof initSettingsPage === "function") {
-                    initSettingsPage();
-                }
-                break;
-
+        if (module.init && typeof window[module.init] === "function") {
+            window[module.init]();
         }
 
-    } catch (error) {
+    } catch (err) {
 
-        console.error(error);
+        console.error(err);
 
         document.getElementById("pageContent").innerHTML = `
             <div class="card">
                 <h2>⚠ Error</h2>
-                <p>${error.message}</p>
+                <p>${err.message}</p>
             </div>
         `;
 
@@ -68,20 +69,17 @@ async function loadPage(page) {
 
 }
 
-// ==============================
-// Sidebar Navigation
-// ==============================
+// Sidebar buttons
 
 document.querySelectorAll(".menu").forEach(button => {
 
+    if (button.id === "logoutBtn") return;
+
     button.addEventListener("click", () => {
 
-        // Ignore logout button
-        if (button.id === "logoutBtn") return;
-
-        document.querySelectorAll(".menu").forEach(menu => {
-            menu.classList.remove("active");
-        });
+        document.querySelectorAll(".menu").forEach(m =>
+            m.classList.remove("active")
+        );
 
         button.classList.add("active");
 
@@ -91,40 +89,18 @@ document.querySelectorAll(".menu").forEach(button => {
 
 });
 
-// ==============================
 // Logout
-// ==============================
 
 const logoutBtn = document.getElementById("logoutBtn");
 
-if (logoutBtn) {
+logoutBtn.addEventListener("click", async () => {
 
-    logoutBtn.addEventListener("click", async () => {
+    await supabaseClient.auth.signOut();
 
-        try {
-
-            await supabaseClient.auth.signOut();
-
-            window.location.href = "index.html";
-
-        } catch (error) {
-
-            console.error(error);
-
-            alert("Unable to logout.");
-
-        }
-
-    });
-
-}
-
-// ==============================
-// Start Dashboard
-// ==============================
-
-window.addEventListener("DOMContentLoaded", () => {
-
-    loadPage("dashboard");
+    location.href = "index.html";
 
 });
+
+// Start
+
+loadPage("dashboard");
