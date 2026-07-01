@@ -5,32 +5,41 @@
 
 let selectedAnnouncementId = null;
 
+// ----------------------------
+// Initialize Page
+// ----------------------------
+
 async function initAnnouncementsPage() {
 
     document
         .getElementById("newAnnouncement")
-        .addEventListener("click", newAnnouncement);
+        .onclick = showNewAnnouncement;
 
     document
         .getElementById("saveAnnouncement")
-        .addEventListener("click", saveAnnouncement);
+        .onclick = saveAnnouncement;
 
     document
         .getElementById("deleteAnnouncement")
-        .addEventListener("click", deleteAnnouncement);
+        .onclick = deleteAnnouncement;
 
     document
         .getElementById("cancelEdit")
-        .addEventListener("click", newAnnouncement);
+        .onclick = closeEditor;
+
+    closeEditor();
 
     await loadAnnouncements();
 
 }
 
+// ----------------------------
+// Load announcements
+// ----------------------------
+
 async function loadAnnouncements() {
 
-    const list =
-        document.getElementById("announcementList");
+    const list = document.getElementById("announcementList");
 
     list.innerHTML = "Loading...";
 
@@ -40,9 +49,7 @@ async function loadAnnouncements() {
 
         .select("*")
 
-        .order("sort_order", {
-            ascending: true
-        });
+        .order("sort_order", { ascending: true });
 
     if (error) {
 
@@ -56,11 +63,11 @@ async function loadAnnouncements() {
 
     data.forEach(item => {
 
-        const div = document.createElement("div");
+        const card = document.createElement("div");
 
-        div.className = "announcement-item";
+        card.className = "announcement-item";
 
-        div.innerHTML = `
+        card.innerHTML = `
 
 <h3>${item.title || "Untitled"}</h3>
 
@@ -74,19 +81,61 @@ ${item.enabled ? "🟢 Enabled" : "⚪ Disabled"}
 
 `;
 
-        div.onclick = () => editAnnouncement(item);
+        card.onclick = () => {
 
-        list.appendChild(div);
+            document.querySelectorAll(".announcement-item")
+                .forEach(i => i.classList.remove("active"));
+
+            card.classList.add("active");
+
+            editAnnouncement(item);
+
+        };
+
+        list.appendChild(card);
 
     });
 
 }
 
+// ----------------------------
+// Open New Editor
+// ----------------------------
+
+function showNewAnnouncement() {
+
+    selectedAnnouncementId = null;
+
+    document.getElementById("announcementWelcome").style.display = "none";
+
+    document.getElementById("announcementEditor").style.display = "block";
+
+    document.getElementById("editorTitle").innerText =
+        "New Announcement";
+
+    document.getElementById("announcementTitle").value = "";
+
+    document.getElementById("announcementMessage").value = "";
+
+    document.getElementById("announcementEnabled").checked = true;
+
+    document.getElementById("announcementStatus").innerHTML = "";
+
+}
+
+// ----------------------------
+// Edit Existing
+// ----------------------------
+
 function editAnnouncement(item) {
 
     selectedAnnouncementId = item.id;
 
-    document.getElementById("editorTitle").textContent =
+    document.getElementById("announcementWelcome").style.display = "none";
+
+    document.getElementById("announcementEditor").style.display = "block";
+
+    document.getElementById("editorTitle").innerText =
         "Edit Announcement";
 
     document.getElementById("announcementTitle").value =
@@ -100,22 +149,26 @@ function editAnnouncement(item) {
 
 }
 
-function newAnnouncement() {
+// ----------------------------
+// Close Editor
+// ----------------------------
+
+function closeEditor() {
 
     selectedAnnouncementId = null;
 
-    document.getElementById("editorTitle").textContent =
-        "New Announcement";
+    document.getElementById("announcementWelcome").style.display = "block";
 
-    document.getElementById("announcementTitle").value = "";
+    document.getElementById("announcementEditor").style.display = "none";
 
-    document.getElementById("announcementMessage").value = "";
-
-    document.getElementById("announcementEnabled").checked = true;
-
-    document.getElementById("announcementStatus").textContent = "";
+    document.querySelectorAll(".announcement-item")
+        .forEach(i => i.classList.remove("active"));
 
 }
+
+// ----------------------------
+// Save
+// ----------------------------
 
 async function saveAnnouncement() {
 
@@ -131,16 +184,15 @@ async function saveAnnouncement() {
     const status =
         document.getElementById("announcementStatus");
 
-    if (!message) {
+    if (message === "") {
 
-        status.textContent =
-            "Please enter a message.";
+        status.innerHTML = "Please enter a message.";
 
         return;
 
     }
 
-    status.textContent = "Saving...";
+    status.innerHTML = "Saving...";
 
     let result;
 
@@ -170,16 +222,17 @@ async function saveAnnouncement() {
 
             .select("sort_order")
 
-            .order("sort_order", {
-                ascending: false
-            })
+            .order("sort_order", { ascending: false })
 
             .limit(1);
 
-        let order = 1;
+        let nextOrder = 1;
 
-        if (data.length)
-            order = data[0].sort_order + 1;
+        if (data.length) {
+
+            nextOrder = data[0].sort_order + 1;
+
+        }
 
         result = await supabaseClient
 
@@ -193,7 +246,7 @@ async function saveAnnouncement() {
 
                 enabled,
 
-                sort_order: order
+                sort_order: nextOrder
 
             });
 
@@ -201,29 +254,29 @@ async function saveAnnouncement() {
 
     if (result.error) {
 
-        status.textContent =
-            result.error.message;
+        status.innerHTML = result.error.message;
 
         return;
 
     }
 
-    status.textContent =
-        "✅ Saved";
+    status.innerHTML = "✅ Saved";
 
     await loadAnnouncements();
 
-    newAnnouncement();
+    closeEditor();
 
 }
 
+// ----------------------------
+// Delete
+// ----------------------------
+
 async function deleteAnnouncement() {
 
-    if (!selectedAnnouncementId)
-        return;
+    if (!selectedAnnouncementId) return;
 
-    if (!confirm("Delete this announcement?"))
-        return;
+    if (!confirm("Delete this announcement?")) return;
 
     const { error } = await supabaseClient
 
@@ -241,8 +294,8 @@ async function deleteAnnouncement() {
 
     }
 
-    newAnnouncement();
+    await loadAnnouncements();
 
-    loadAnnouncements();
+    closeEditor();
 
 }
