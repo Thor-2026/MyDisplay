@@ -17,9 +17,7 @@
         </div>
 
         <div id="announcementList">
-
             Loading...
-
         </div>
 
     </div>
@@ -28,7 +26,31 @@
 
     <div class="announcement-editor">
 
-        <div class="card">
+        <!-- Welcome Screen -->
+
+        <div id="announcementWelcome" class="card">
+
+            <h2>📢 Announcements</h2>
+
+            <p style="margin-top:20px;font-size:18px;opacity:.8;line-height:1.8">
+
+                Select an announcement from the left to edit it.
+
+                <br><br>
+
+                or click
+
+                <strong>➕ New</strong>
+
+                to create a new announcement.
+
+            </p>
+
+        </div>
+
+        <!-- Editor -->
+
+        <div id="announcementEditor" class="card" style="display:none;">
 
             <h2 id="editorTitle">
                 New Announcement
@@ -37,8 +59,8 @@
             <label>Title</label>
 
             <input
-                type="text"
                 id="announcementTitle"
+                type="text"
                 placeholder="Safety Meeting">
 
             <br><br>
@@ -48,15 +70,15 @@
             <textarea
                 id="announcementMessage"
                 rows="8"
-                placeholder="Meeting today at 2 PM in lunch room"></textarea>
+                placeholder="Meeting today at 2 PM"></textarea>
 
             <br><br>
 
             <label>
 
                 <input
-                    type="checkbox"
                     id="announcementEnabled"
+                    type="checkbox"
                     checked>
 
                 Enabled
